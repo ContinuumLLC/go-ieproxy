@@ -66,7 +66,7 @@ func writeConf() {
 	if proxy == "" && !autoDetect {
 		// Fall back to IE registry or manual detection if nothing is found there..
 		regedit, err := readRegedit(registry.WOW64_64KEY) // If the syscall fails, backup to manual detection.
-		if nil != err || "" == regedit.ProxyServer || "" == regedit.AutoConfigURL {
+		if nil != err || ("" == regedit.ProxyServer && "" == regedit.AutoConfigURL) {
 			regedit, _ = readRegedit(registry.WOW64_32KEY)
 		}
 		windowsProxyConf = parseRegedit(regedit)
