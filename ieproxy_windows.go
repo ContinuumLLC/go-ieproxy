@@ -15,6 +15,11 @@ type regeditValues struct {
 	AutoConfigURL string
 }
 
+const (
+	regKeyForInternetSetting = "Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings"
+)
+
+
 var once sync.Once
 var windowsProxyConf ProxyConf
 
@@ -60,7 +65,10 @@ func writeConf() {
 
 	if proxy == "" && !autoDetect {
 		// Fall back to IE registry or manual detection if nothing is found there..
-		regedit, _ := readRegedit() // If the syscall fails, backup to manual detection.
+		regedit, err := readRegedit(registry.WOW64_64KEY) // If the syscall fails, backup to manual detection.
+		if nil != err || "" == regedit.ProxyServer || "" == regedit.AutoConfigURL {
+			regedit, _ = readRegedit(registry.WOW64_32KEY)
+		}
 		windowsProxyConf = parseRegedit(regedit)
 		return
 	}
@@ -167,8 +175,9 @@ func parseRegedit(regedit regeditValues) ProxyConf {
 	}
 }
 
-func readRegedit() (values regeditValues, err error) {
-	k, err := registry.OpenKey(registry.CURRENT_USER, `Software\Microsoft\Windows\CurrentVersion\Internet Settings`, registry.QUERY_VALUE)
+func readRegedit(access32or64 uint32) (values regeditValues, err error) {
+	//k, err := registry.OpenKey(registry.CURRENT_USER, `Software\Microsoft\Windows\CurrentVersion\Internet Settings`, registry.QUERY_VALUE)
+	k, err := registry.OpenKey(registry.LOCAL_MACHINE, regKeyForInternetSetting, registry.QUERY_VALUE|registry.READ|access32or64)
 	if err != nil {
 		return
 	}
