@@ -7,3 +7,5 @@ require (
 	golang.org/x/sys v0.0.0-20191112214154-59a1497f0cea
 	golang.org/x/text v0.3.2 // indirect
 )
+
+replace github.com/mattn/go-ieproxy => github.com/ContinuumLLC/go-ieproxy v0.0.0-20200117102254-d68ae853b89e
